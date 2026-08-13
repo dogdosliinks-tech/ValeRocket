@@ -93,6 +93,12 @@ input[type=range]:focus-visible{outline:3px solid var(--azul);outline-offset:3px
   display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .passo button:active{background:var(--corda)}
 .passo button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+#instalar{display:block;width:100%;margin:0 0 12px;padding:13px;
+  font-family:var(--disp);font-size:.98rem;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;background:var(--corda);color:var(--tinta);
+  border:1px solid #d3a004;border-radius:3px;cursor:pointer}
+#instalar[hidden]{display:none}
+#instalar:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
 .trava{display:flex;align-items:center;gap:9px;margin-bottom:12px;
   background:var(--placa);border:1px solid var(--linha);border-radius:3px;padding:9px 12px}
 .trava button{font-family:var(--disp);font-weight:600;font-size:.82rem;letter-spacing:.1em;
@@ -153,6 +159,8 @@ ul.check li{margin-bottom:6px}
     <h1>ValeRocket</h1>
     <p>Calculadora de lançamento · Prof. Breno Reis</p>
   </div>
+
+  <button id="instalar" hidden>Instalar ValeRocket</button>
 
   <div class="trava">
     <button id="btTrava" aria-pressed="false">Travar</button>
@@ -671,6 +679,17 @@ ul.check li{margin-bottom:6px}
       ? "Barras travadas. Os botões − e + continuam funcionando."
       : "Barras liberadas. Trave para não mudar valores sem querer no campo.";
   });
+
+  // ---------- convite de instalação do Chrome ----------
+  var promptInstalar = null, btInst = document.getElementById("instalar");
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault(); promptInstalar = e; btInst.hidden = false;
+  });
+  btInst.addEventListener("click", function(){
+    if(!promptInstalar) return;
+    promptInstalar.prompt(); promptInstalar = null; btInst.hidden = true;
+  });
+  window.addEventListener("appinstalled", function(){ btInst.hidden = true; });
 
   render();
 })();
