@@ -38,9 +38,9 @@ body{
   text-transform:uppercase;color:#93a4ab;margin:6px 0 0}
 
 /* modo */
-.modos{display:flex;gap:0;margin-bottom:14px;border:2px solid var(--tinta);border-radius:3px;overflow:hidden}
-.modos button{flex:1;font-family:var(--disp);font-weight:600;font-size:.9rem;
-  letter-spacing:.07em;text-transform:uppercase;padding:11px 6px;border:0;
+.modos{display:flex;flex-wrap:wrap;gap:0;margin-bottom:14px;border:2px solid var(--tinta);border-radius:3px;overflow:hidden}
+.modos button{flex:1 1 33%;min-width:90px;font-family:var(--disp);font-weight:600;font-size:.8rem;
+  letter-spacing:.05em;text-transform:uppercase;padding:10px 4px;border:0;
   background:var(--placa);color:var(--tinta-3);cursor:pointer;line-height:1.15}
 .modos button[aria-pressed=true]{background:var(--tinta);color:var(--placa)}
 .modos button small{display:block;font-family:var(--dado);font-size:.58rem;
@@ -170,10 +170,11 @@ ul.check li{margin-bottom:6px}
   <div class="modos" id="modos" role="group" aria-label="Tipo de propulsão">
     <button data-modo="quim" aria-pressed="true">Vinagre + bicarbonato<small>reação química</small></button>
     <button data-modo="ar" aria-pressed="false">Ar comprimido<small>bomba / O₂</small></button>
+    <button data-modo="conc" aria-pressed="false">Concentrar vinagre<small>redução por calor</small></button>
   </div>
 
   <!-- ===== MOSTRADOR ===== -->
-  <div class="mostrador">
+  <div class="mostrador" id="mostrador">
     <svg class="dial" viewBox="0 0 340 250" role="img" aria-labelledby="dialTit">
       <title id="dialTit">Mostrador de pressão</title>
       <circle cx="170" cy="170" r="146" fill="#fff" stroke="#c9d3d8"/>
@@ -211,11 +212,8 @@ ul.check li{margin-bottom:6px}
         <input type="range" id="liq" min="200" max="1600" step="25" value="750">
       </div>
       <div class="ctl">
-        <label>Acidez do vinagre <span class="v" id="acV">8%</span></label>
-        <div class="seg" id="acidez">
-          <button data-ac="4">4%</button><button data-ac="6">6%</button>
-          <button data-ac="8" aria-pressed="true">8%</button>
-        </div>
+        <label for="acid">Acidez do vinagre <span class="v"><span id="acV">8,0</span>%</span></label>
+        <input type="range" id="acid" min="4" max="8" step="0.1" value="8">
       </div>
       <div class="ctl">
         <label for="bic">Bicarbonato <span class="v"><span id="bicV">90</span> g</span></label>
@@ -251,8 +249,48 @@ ul.check li{margin-bottom:6px}
     </div>
   </div>
 
+  <!-- ===== CONCENTRAÇÃO ===== -->
+  <div class="painel" id="pConc" hidden>
+    <h2>Concentração por redução</h2>
+    <div class="corpo">
+      <div class="ctl">
+        <label for="cVi">Volume inicial de vinagre <span class="v"><span id="cViV">1000</span> mL</span></label>
+        <input type="range" id="cVi" min="200" max="3000" step="50" value="1000">
+      </div>
+      <div class="ctl">
+        <label for="cCi">Acidez inicial <span class="v"><span id="cCiV">4,0</span>%</span></label>
+        <input type="range" id="cCi" min="2" max="12" step="0.5" value="4">
+      </div>
+      <div class="ctl">
+        <label for="cVf">Volume após a fervura <span class="v"><span id="cVfV">500</span> mL</span></label>
+        <input type="range" id="cVf" min="50" max="3000" step="25" value="500">
+      </div>
+      <div class="ctl">
+        <label for="cRet">Ácido conservado <span class="v"><span id="cRetV">95</span>%</span></label>
+        <input type="range" id="cRet" min="70" max="100" step="1" value="95">
+      </div>
+      <div class="ctl">
+        <label for="cTax">Taxa de evaporação medida <span class="v"><span id="cTaxV">8</span> mL/min</span></label>
+        <input type="range" id="cTax" min="1" max="40" step="1" value="8">
+      </div>
+
+      <table class="saida" style="margin-top:6px">
+        <tr class="destaque"><th>Acidez resultante</th><td id="cOut">—</td></tr>
+        <tr><th>Fator de concentração</th><td id="cFat">—</td></tr>
+        <tr><th>Ácido acético</th><td id="cMas">—</td></tr>
+        <tr><th>Tempo estimado de fervura</th><td id="cTem">—</td></tr>
+        <tr><th>Bicarbonato para esta carga</th><td id="cBic">—</td></tr>
+      </table>
+
+      <div class="acao" style="margin-top:10px">
+        <button id="cAplicar">Usar esta acidez no cálculo</button>
+      </div>
+      <div id="cAvisos" style="margin-top:10px"></div>
+    </div>
+  </div>
+
   <!-- ===== GARRAFA ===== -->
-  <div class="painel">
+  <div class="painel" id="pGar">
     <h2>Garrafa</h2>
     <div class="corpo">
       <div class="ctl">
@@ -272,7 +310,7 @@ ul.check li{margin-bottom:6px}
   </div>
 
   <!-- ===== BASE ===== -->
-  <div class="painel">
+  <div class="painel" id="pBase">
     <h2>Base de lançamento</h2>
     <div class="corpo">
       <div class="ctl">
@@ -295,7 +333,7 @@ ul.check li{margin-bottom:6px}
   </div>
 
   <!-- ===== FOGUETE ===== -->
-  <div class="painel">
+  <div class="painel" id="pFog">
     <h2>Foguete</h2>
     <div class="corpo">
       <div class="ctl">
@@ -306,7 +344,7 @@ ul.check li{margin-bottom:6px}
   </div>
 
   <!-- ===== NÚMEROS ===== -->
-  <div class="painel">
+  <div class="painel" id="pNum">
     <h2>Números da carga</h2>
     <div class="corpo">
       <table class="saida">
@@ -326,7 +364,7 @@ ul.check li{margin-bottom:6px}
   <div id="avisos"></div>
 
   <!-- ===== REGISTRO ===== -->
-  <div class="painel">
+  <div class="painel" id="pFicha">
     <h2>Ficha de campo</h2>
     <div class="corpo">
       <table id="tabela-log">
@@ -386,7 +424,8 @@ ul.check li{margin-bottom:6px}
     bomba:100, agua:600, npoli:1.15,
     garrafa:1500, lim:200,
     cano:80.3, bitola:17, con:18,
-    seco:198
+    seco:198,
+    cVi:1000, cCi:4, cVf:500, cRet:95, cTax:8
   };
 
   var MM_ACIDO=60.05, MM_BICARB=84.01, PSI=14.696, MAX_DIAL=250, ATM=101325;
@@ -435,6 +474,46 @@ ul.check li{margin-bottom:6px}
     r.espec = r.energia/(r.massa/1000);                                  // J por kg
     r.ench = S.garrafa>0 ? liquido/S.garrafa*100 : 0;
     return r;
+  }
+
+  function calcConc(){
+    var mIni = S.cVi*S.cCi/100;                       // g de acido acetico
+    var mFim = mIni*S.cRet/100;
+    var cFim = S.cVf>0 ? mFim/S.cVf*100 : 0;
+    var fator = S.cCi>0 ? cFim/S.cCi : 0;
+    var evap = Math.max(S.cVi - S.cVf, 0);
+    var tempo = S.cTax>0 ? evap/S.cTax : 0;
+    var bic = mFim/60.05*84.01;
+    return {mIni:mIni, mFim:mFim, cFim:cFim, fator:fator,
+            evap:evap, tempo:tempo, bic:bic};
+  }
+
+  function renderConc(){
+    var c = calcConc();
+    document.getElementById("cOut").innerHTML = n1(c.cFim)+
+      "%<span class='sub'>partindo de "+n1(S.cCi)+"%</span>";
+    document.getElementById("cFat").innerHTML = n2(c.fator)+
+      "&#215;<span class='sub'>"+Math.round(c.evap)+" mL de água evaporados</span>";
+    document.getElementById("cMas").innerHTML = n1(c.mFim)+
+      " g<span class='sub'>de "+n1(c.mIni)+" g iniciais</span>";
+    document.getElementById("cTem").innerHTML = Math.round(c.tempo)+
+      " min<span class='sub'>à taxa medida de "+S.cTax+" mL/min</span>";
+    document.getElementById("cBic").innerHTML = Math.round(c.bic*1.06)+
+      " g<span class='sub'>estequiométrico "+Math.round(c.bic)+" g + 6%</span>";
+
+    var o = [];
+    if(S.cVf >= S.cVi) o.push(["nota","Sem redução",
+      "O volume final é igual ou maior que o inicial. Reduza o volume final para concentrar."]);
+    if(c.cFim > 20) o.push(["","Concentração alta",
+      "Acima de 20% os vapores ficam bastante irritantes e a perda de ácido junto com o "+
+      "vapor cresce. Trabalhe ao ar livre e reduza a expectativa de rendimento."]);
+    if(S.cVf < S.cVi*0.25 && S.cVf < S.cVi) o.push(["nota","Redução agressiva",
+      "Reduzir a menos de um quarto do volume exige fervura prolongada e aumenta a perda "+
+      "de ácido. Considere partir de vinagre de acidez maior."]);
+    if(!o.length) o.push(["ok","Redução viável",
+      "Meça o volume com proveta ao fim da fervura e ajuste o campo acima com o valor real."]);
+    document.getElementById("cAvisos").innerHTML = o.map(function(a){
+      return '<div class="aviso '+a[0]+'"><b>'+a[1]+'</b>'+a[2]+'</div>'; }).join("");
   }
 
   // ---------- mostrador ----------
@@ -505,6 +584,13 @@ ul.check li{margin-bottom:6px}
   }
 
   function render(){
+    var conc = (S.modo==="conc");
+    ["mostrador","folga","pGar","pBase","pFog","pNum","avisos","pFicha"].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.hidden = conc;
+    });
+    document.getElementById("pConc").hidden = !conc;
+    if(conc){ renderConc(); return; }
+
     var r=calcular(), q=(S.modo==="quim");
 
     document.getElementById("psiReal").textContent=Math.round(r.psiReal);
@@ -559,13 +645,17 @@ ul.check li{margin-bottom:6px}
       render();
     });
   }
-  slider("liq","liq","liqV"); slider("bic","bic","bicV");
+  slider("liq","liq","liqV");
+  slider("acid","acidez","acV",function(v){return n1(v);}); slider("bic","bic","bicV");
   slider("temp","temp","tempV"); slider("rend","rend","rendV");
   slider("bomba","bomba","bombaV"); slider("agua","agua","aguaV");
   slider("npoli","npoli","npoliV",function(v){return n2(v);});
   slider("lim","lim","limV"); slider("con","con","conV");
   slider("cano","cano","canoV",function(v){return n1(v);});
   slider("seco","seco","secoV");
+  slider("cVi","cVi","cViV"); slider("cVf","cVf","cVfV");
+  slider("cCi","cCi","cCiV",function(v){return n1(v);});
+  slider("cRet","cRet","cRetV"); slider("cTax","cTax","cTaxV");
 
   function grupo(id,attr,campo,alvo,rot){
     var box=document.getElementById(id);
@@ -578,7 +668,19 @@ ul.check li{margin-bottom:6px}
       render();
     });
   }
-  grupo("acidez","ac","acidez","acV",function(b){return b.dataset.ac+"%";});
+
+  document.getElementById("cAplicar").addEventListener("click", function(){
+    var c = calcConc();
+    if(!(c.cFim > 0)) return;
+    S.acidez = Math.round(c.cFim*10)/10;
+    var sl = document.getElementById("acid");
+    if(S.acidez > parseFloat(sl.max)) sl.max = Math.ceil(S.acidez);
+    if(S.acidez < parseFloat(sl.min)) sl.min = Math.floor(S.acidez);
+    sl.value = S.acidez;
+    document.getElementById("acV").textContent = n1(S.acidez);
+    document.querySelector('[data-modo="quim"]').click();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
   grupo("garrafa","g","garrafa","garV",function(b){return b.textContent;});
   grupo("bitola","d","bitola","bitV",function(b){
     return {"15.7":'½" roscável',"17":'½" soldável',"21.6":'¾" soldável'}[b.dataset.d];
